@@ -2,7 +2,12 @@
   "name": "student_wall_frontend",
   "version": "0.1.0",
   "description": "Internet Computer starter application",
-  "keywords": ["Internet Computer", "Motoko", "JavaScript", "Canister"],
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "JavaScript",
+    "Canister"
+  ],
   "scripts": {
     "build": "webpack",
     "prebuild": "npm run generate",
@@ -12,7 +17,7 @@
   },
   "devDependencies": {
     "@dfinity/agent": "0.15.6",
-    "@dfinity/candid": "0.15.6",
+    "@dfinity/candid": "^0.15.6",
     "@dfinity/principal": "0.15.6",
     "assert": "2.0.0",
     "buffer": "6.0.3",
@@ -35,5 +40,11 @@
     "last 2 firefox version",
     "last 2 safari version",
     "last 2 edge version"
-  ]
+  ],
+  "dependencies": {
+    "@dfinity/auth-client": "^0.15.6",
+    "bootstrap": "^5.2.3",
+    "jquery": "^3.7.0",
+    "sweetalert": "^2.1.2"
+  }
 }
