@@ -1,8 +1,8 @@
 import { createActor, student_wall_backend } from "../../declarations/student_wall_backend";
 import { AuthClient } from "@dfinity/auth-client"
 import { HttpAgent } from "@dfinity/agent";
-import 'bootstrap'
-import 'jquery'
+import {Modal} from 'bootstrap'
+import $ from 'jquery'
 import '@popperjs/core'
 import swal from 'sweetalert'
 
