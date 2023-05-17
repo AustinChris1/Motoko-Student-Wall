@@ -11,10 +11,10 @@
   <link type="text/css" rel="stylesheet" href="main.css" />
   <link type="text/css" rel="stylesheet" href="bootstrap.css" />
   <!-- <script src="sweetalert.min.js"></script> -->
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="alpine.js"></script>
 </head>
 
-<body x-data="{ currentMessage: null }">
+<body x-data="{ }">
   <main>
     <div class="container-fluid px-4">
 
@@ -26,7 +26,7 @@
             <br />
             <br />
             <form>
-              <button class="btn btn-lg btn-primary w-50 float-end" id="login"><img src="internet-computer-icp-logo.svg"
+              <button x-show="!!$store.user ? $store.user.isLoggedIn : true" class="btn btn-lg btn-primary w-50 float-end" id="login"><img src="internet-computer-icp-logo.svg"
                   alt="ICP logo" width="60" height="25" />Login</button>
             </form>
             <br />
