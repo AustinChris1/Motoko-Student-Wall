@@ -111,8 +111,6 @@ actor {
 
   //Delete a specific message by ID
   public shared ({ caller }) func deleteMessage(messageId : Nat) : async Result.Result<(), Text> {
-    let messageSize = wall.size();
-    if (messageId < messageSize) {
       switch (wall.get(messageId)) {
         case (?message) {
           if (Principal.equal(message.creator, caller)) {
@@ -128,9 +126,6 @@ actor {
           return #err("No message");
         };
       };
-    } else {
-      return #err("Invalid Message Id " # Nat.toText(messageId));
-    };
 
   };
 

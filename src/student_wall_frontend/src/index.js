@@ -56,13 +56,13 @@ loginButton.onclick = async (e) => {
 document.addEventListener('alpine:init', async () => {
   Alpine.store('messages', {
     messages: [],
-    add (message) {
+    add(message) {
       if (this.messages.find(_message => _message.messageId === message.messageId))
         return
       this.messages.push(message)
     },
-    async fetchAll () {
-      for (let i =0; i < this.messages.length; i++)
+    async fetchAll() {
+      for (let i = 0; i < this.messages.length; i++)
         this.messages.pop()
 
       const response = await actor.getAllMessagesRanked();
@@ -76,13 +76,17 @@ document.addEventListener('alpine:init', async () => {
     async upVote(msgId) {
       const response = await actor.upVote(msgId);
       Alpine.store("messages").fetchAll()
-      swal("Message", response);
+      const message = !!response.err ? response.err : "Created successfully";
+      const icon = !!response.err ? "error" : "success";
+      swal("Message", message, icon);
       console.log(response);
     },
     async downVote(msgId) {
       const response = await actor.downVote(msgId);
       Alpine.store("messages").fetchAll()
-      swal("Message", response);
+      const message = !!response.err ? response.err : "Created successfully";
+      const icon = !!response.err ? "error" : "success";
+      swal("Message", message, icon);
       console.log(response);
     },
     async getVotes(msgId) {
@@ -92,13 +96,15 @@ document.addEventListener('alpine:init', async () => {
     async deleteMessage(msgId) {
       const response = await actor.deleteMessage(msgId);
       Alpine.store("messages").fetchAll()
-      swal("Message", response);
+      const message = !!response.err ? response.err : "Created successfully";
+      const icon = !!response.err ? "error" : "success";
+      swal("Message", message, icon);
       console.log(response);
     }
   })
 
   Alpine.store("user", {
-    async init () {
+    async init() {
       console.log("udiuehdue")
     }
   })
@@ -108,7 +114,7 @@ document.addEventListener('alpine:init', async () => {
 
 
 //write message
-document.querySelector("#writeForm").addEventListener("submit", async function(event){
+document.querySelector("#writeForm").addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const btn = event.target.querySelector("#submit-btn");
@@ -124,7 +130,7 @@ document.querySelector("#writeForm").addEventListener("submit", async function(e
   imageFileReader.readAsArrayBuffer(inputImage)
   imageFileReader.addEventListener("loadend", async () => {
     const imageBuffer = [... new Uint8Array(imageFileReader.result)]
-    // imageBlob = new Blob([imageBuffer], { type: inputImage.type})
+    imageBlob = new Blob([imageBuffer], { type: inputImage.type })
 
     if (inputVideo) {
       const videoFileReader = new FileReader()
@@ -133,9 +139,9 @@ document.querySelector("#writeForm").addEventListener("submit", async function(e
         const videoBuffer = [...new Uint8Array(videoFileReader.result)]
         // videoBlob = new Blob([videoBuffer], { type: inputVideo.type})
 
-        if (document.getElementById("formText").value.length != 0){
+        if (document.getElementById("formText").value.length != 0) {
           btn.setAttribute("disabled", true);
-          
+
           // await writeMessage(inputText, imageBlob, videoBlob)
           await writeMessage(inputText, imageBuffer, videoBuffer)
           // await writeMessage(inputText)
@@ -150,29 +156,29 @@ document.querySelector("#writeForm").addEventListener("submit", async function(e
     // else {
     //   if (document.getElementById("formText").value.length != 0){
     //     btn.setAttribute("disabled", true);
-        
+
     //     await writeMessage(inputText, imageBlob, videoBlob)
 
     //     document.getElementById("formText").value = "";
     //   }
 
     //       Alpine.store("messages").fetchAll()
-//       btn.removeAttribute("disabled");
-//     }
+    //       btn.removeAttribute("disabled");
+    //     }
   });
 })
 
 async function writeMessage(inputText, imageBlob, videoBlob) {
-  
+
   // const response = await actor.writeMessage({Text:inputText, Image:imageBlob, Video:videoBlob});
-  const response = await actor.writeMessage({Text:inputText});
+  const response = await actor.writeMessage({ Image: imageBlob });
 
   const message = !!response.err ? response.err : "Created successfully";
   const icon = !!response.err ? "error" : "success";
   swal("Message", message, icon);
 }
 //update message
-document.querySelector("#updateForm").addEventListener("submit", async function(event){
+document.querySelector("#updateForm").addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const btn = event.target.querySelector("#update-btn");
@@ -181,15 +187,15 @@ document.querySelector("#updateForm").addEventListener("submit", async function(
   const inputText = document.getElementById("updateText").value;
 
 
-  if (document.getElementById("updateText").value.length != 0){
-      btn.setAttribute("disabled", true);
-      // const response = await actor.updateMessage({messageId : id , Text: inputText});
-      const response = await actor.updateMessage( id, {Text: inputText});
-      console.log(response);
-      const message = !!response.err ? response.err : "Updated successfully";
-      const icon = !!response.err ? "error" : "success";
-      swal("Message", message, icon);
-      document.getElementById("updateText").value = "";
+  if (document.getElementById("updateText").value.length != 0) {
+    btn.setAttribute("disabled", true);
+    // const response = await actor.updateMessage({messageId : id , Text: inputText});
+    const response = await actor.updateMessage(id, { Text: inputText });
+    console.log(response);
+    const message = !!response.err ? response.err : "Updated successfully";
+    const icon = !!response.err ? "error" : "success";
+    swal("Message", message, icon);
+    document.getElementById("updateText").value = "";
   }
   Alpine.store("messages").fetchAll()
 

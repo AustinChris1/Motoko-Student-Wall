@@ -125,11 +125,11 @@
                             class="btn btn-success upvote-message.messageId"> &#43; </button></td>
                         <td><button @click="$store.events.downVote(message.messageId)"
                             class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
-                        <td><button class="btn btn-secondary" data-toggle="modal" data-target="#votersModal"> View
+                        <td><button class="btn btn-secondary" data-toggle="modal" :data-target="'#votersModal' + message.messageId"> View
                           </button>
                           <!-- Button trigger modal -->
                           <!-- Modal -->
-                          <div class="modal fade" id="votersModal" tabindex="-1" role="dialog"
+                          <div class="modal fade" :id="'votersModal' + message.messageId" tabindex="-1" role="dialog"
                             aria-labelledby="votersModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                               <div class="modal-content">
