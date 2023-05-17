@@ -101,7 +101,7 @@ module.exports = {
         {
           from: `src/${frontendDirectory}/src/.ic-assets.json*`,
           to: ".ic-assets.json5",
-          noErrorOnMissing: true
+          noErrorOnMissing: false
         },
       ],
     }),

@@ -1,9 +1,6 @@
 import { createActor, student_wall_backend } from "../../declarations/student_wall_backend";
 import { AuthClient } from "@dfinity/auth-client"
 import { HttpAgent } from "@dfinity/agent";
-import {Modal} from 'bootstrap'
-import $ from 'jquery'
-import '@popperjs/core'
 import swal from 'sweetalert'
 
 let actor = student_wall_backend;
@@ -57,126 +54,53 @@ loginButton.onclick = async (e) => {
 
 
 // main deal
-window.addEventListener("load", async function () {
-  show();
+document.addEventListener('alpine:init', () => {
+  Alpine.store('messages', {
+    messages: [],
+    add (message) {
+      if (this.messages.find(_message => _message.messageId === message.messageId))
+        return
+      this.messages.push(message)
+    },
+    async fetchAll () {
+      for (let i =0; i < this.messages.length; i++)
+        this.messages.pop()
 
-});
+      const response = await actor.getAllMessagesRanked();
+      console.log(response)
+      for (const message of response)
+        this.add(message)
+    }
+  })
 
-async function show() {
-  const response = await actor.getAllMessagesRanked();
-  console.log(response);
+  Alpine.store('events', {
+    async upVote(msgId) {
+      const response = await actor.upVote(msgId);
+      Alpine.store("messages").fetchAll()
+      swal("Message", response);
+      console.log(response);
+    },
+    async downVote(msgId) {
+      const response = await actor.downVote(msgId);
+      Alpine.store("messages").fetchAll()
+      swal("Message", response);
+      console.log(response);
+    },
+    async getVotes(msgId) {
+      const response = await actor.getVoters(msgId);
+      console.log(response);
+    },
+    async deleteMessage(msgId) {
+      const response = await actor.deleteMessage(msgId);
+      Alpine.store("messages").fetchAll()
+      swal("Message", response);
+      console.log(response);
+    }
+  })
 
-  const tableBody = document.querySelector('#output');
+  Alpine.store("messages").fetchAll()
+})
 
-  response.forEach((obj, index) => {
-    const row = document.createElement('tr');
-
-    const indexCell = document.createElement('td');
-    // indexCell.innerText = index;
-    const msgId = obj.messageId;
-    indexCell.innerText = msgId;
-    row.appendChild(indexCell);
-
-    const contentCell = document.createElement('td');
-    contentCell.innerText = JSON.stringify(obj.content.Text, null, 2);
-    row.appendChild(contentCell);
-
-    const creatorCell = document.createElement('td');
-    creatorCell.innerText = obj.creator;
-    row.appendChild(creatorCell);
-
-    const voteCell = document.createElement('td');
-    voteCell.innerText = obj.vote.toString();
-    row.appendChild(voteCell);
-
-
-    // create a new cell element for the upvote button
-    const ubuttonCell = document.createElement("td");
-    const upVoteButton = document.createElement("button");
-    upVoteButton.classList.add("btn", "btn-success", `upVote-${msgId}`);
-    upVoteButton.innerHTML = "&#43;";
-    ubuttonCell.appendChild(upVoteButton);
-    row.appendChild(ubuttonCell);
-
-    // create a new cell element for the downvote button
-    const dbuttonCell = document.createElement("td");
-    const downVoteButton = document.createElement("button");
-    downVoteButton.classList.add("btn", "btn-danger", `downVote-${msgId}`);
-    downVoteButton.innerHTML = " &#8722 ";
-    dbuttonCell.appendChild(downVoteButton);
-    row.appendChild(dbuttonCell);
-
-
-    // Event listener for upvote button
-    upVoteButton.addEventListener("click", async () => {
-      await upVote(msgId);
-    });
-
-    // Event listener for downvote button
-    downVoteButton.addEventListener("click", async () => {
-      await downVote(msgId);
-    });
-
-    // create a new cell element for the upvote button
-    const vbuttonCell = document.createElement("td");
-    // const viewButton = document.createElement("button");
-    // viewButton.classList.add("btn", "btn-secondary", `view-${msgId}`);
-    vbuttonCell.innerText = obj.voters;
-    row.appendChild(vbuttonCell);
-
-    // viewButton.addEventListener("click", function() {
-    //   swal({
-    //     title: "Feature is coming soon!",
-    //     text: "",
-    //     icon: "warning",
-    //   });
-    // });
-    // create a new cell element for the upvote button
-    const delbuttonCell = document.createElement("td");
-    const delButton = document.createElement("button");
-    delButton.classList.add("btn", "btn-danger", `delete-${msgId}`);
-    delButton.innerHTML = " &times; ";
-    delbuttonCell.appendChild(delButton);
-    row.appendChild(delbuttonCell);
-
-    // Event listener for delete button
-    delButton.addEventListener("click", async () => {
-      await deleteMessage(msgId);
-    });
-
-
-    tableBody.appendChild(row);
-
-
-
-  });
-
-  
-  // const votes = await actor.getAllMessages();
-
-}
-
-  async function upVote(msgId) {
-    const response = await actor.upVote(msgId);
-    swal("Message", response);
-    console.log(response);
-  }
-  
-  async function downVote(msgId) {
-    const response = await actor.downVote(msgId);
-    swal("Message", response);
-    console.log(response);
-  }
-
-  async function getVotes(msgId) {
-    const response = await actor.getVoters(msgId);
-    console.log(response);
-  }
-  async function deleteMessage(msgId) {
-    const response = await actor.deleteMessage(msgId);
-    swal("Message", response);
-    console.log(response);
-  }
 
 //write message
 document.querySelector("#writeForm").addEventListener("submit", async function(event){
@@ -195,7 +119,8 @@ document.querySelector("#writeForm").addEventListener("submit", async function(e
   }
   // await dbank_backend.compound();
 
-  show();
+  // show();
+  Alpine.store("messages").fetchAll()
   btn.removeAttribute("disabled");
 
 });
@@ -205,19 +130,21 @@ document.querySelector("#updateForm").addEventListener("submit", async function(
 
   const btn = event.target.querySelector("#update-btn");
 
-  const id = document.getElementById("updateVal").value;
+  const id = parseInt(document.getElementById("updateVal").value);
   const inputText = document.getElementById("updateText").value;
 
 
   if (document.getElementById("updateText").value.length != 0){
       btn.setAttribute("disabled", true);
-      const response = await actor.updateMessage({messageId : id , Text: inputText});
+      // const response = await actor.updateMessage({messageId : id , Text: inputText});
+      const response = await actor.updateMessage( id, {Text: inputText});
       // swal("Message", response);
       document.getElementById("updateText").value = "";
   }
-  // await dbank_backend.compound();
+  Alpine.store("messages").fetchAll()
 
-  show();
   btn.removeAttribute("disabled");
 
 });
+
+Alpine.start()

@@ -10,9 +10,11 @@
   <!-- Bootstrap CSS -->
   <link type="text/css" rel="stylesheet" href="main.css" />
   <link type="text/css" rel="stylesheet" href="bootstrap.css" />
+  <!-- <script src="sweetalert.min.js"></script> -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body>
+<body x-data="{}">
   <main>
     <div class="container-fluid px-4">
 
@@ -103,9 +105,20 @@
                       <th>Delete Message</th>
                     </tr>
                   </thead>
-                  <tbody id="output" class="align-middle">
+                  <tbody id="output" class="align-middle" x-data="{ messages: !!$store.messages ? $store.messages?.messages : []}">
+                    <template x-for="message in messages">
                     <tr>
+                      <td x-text="message.messageId"></td>
+                      <td x-text="message.content.Text"></td>
+                      <td x-text="message.creator"></td>
+                      <td x-text="message.vote"></td>
+                      <td><button @click="$store.events.upVote(message.messageId)" class="btn btn-success upvote-message.messageId"> &#43; </button></td>
+                      <td><button @click="$store.events.downVote(message.messageId)" class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
+                      <td x-text="message.voters"></td>
+                      <td><button @click="$store.events.deleteMessage(message.messageId)" class="btn btn-danger delete.messageId"> &times; </button></td>
+                      <td></td>
                     </tr>
+                    </template>
                   </tbody>
                 </table>
               </div>

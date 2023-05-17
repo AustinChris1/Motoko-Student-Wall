@@ -44,6 +44,7 @@
   "dependencies": {
     "@dfinity/auth-client": "^0.15.6",
     "@popperjs/core": "^2.11.7",
+    "alpine": "^0.2.1",
     "bootstrap": "^5.2.3",
     "jquery": "^3.7.0",
     "sweetalert": "^2.1.2"

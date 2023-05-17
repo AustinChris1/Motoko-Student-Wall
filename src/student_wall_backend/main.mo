@@ -51,8 +51,8 @@ actor {
 
   // Add a new message to the wall
   public shared ({ caller }) func writeMessage(c : Content) : async Nat {
-    let id = messageId;
     messageId += 1;
+    let id = messageId;
     let message : Message = {
       messageId = id;
       vote = 0;
@@ -67,7 +67,7 @@ actor {
   // Get a specific message by ID
   public shared query ({ caller }) func getMessage(messageId : Nat) : async Result.Result<Message, Text> {
     let messageSize = wall.size();
-    if (messageId < messageSize) {
+    // if (messageId < messageSize) {
       switch (wall.get(messageId)) {
         case (?message) {
           return #ok(message);
@@ -76,9 +76,9 @@ actor {
           return #err("No message");
         };
       };
-    } else {
-      return #err("Invalid Message Id " # Nat.toText(messageId));
-    };
+    // } else {
+    //   return #err("Invalid Message Id " # Nat.toText(messageId));
+    // };
   };
 
   // Update the content for a specific message by ID
