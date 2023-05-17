@@ -136,9 +136,6 @@ actor {
 
   // Voting
   public shared ({ caller }) func upVote(messageId : Nat) : async Result.Result<(), Text> {
-    if (messageId >= wall.size()) {
-      return #err("Invalid Message Id " # Nat.toText(messageId));
-    } else {
       switch (wall.get(messageId)) {
         case (?message) {
           var existingVote : Text = "";
@@ -167,14 +164,10 @@ actor {
           return #err("Message does not exist");
         };
       };
-    };
   };
 
   //downVote
   public shared ({ caller }) func downVote(messageId : Nat) : async Result.Result<(), Text> {
-    if (messageId > wall.size()) {
-      return #err("Invalid Message Id " # Nat.toText(messageId));
-    } else {
       switch (wall.get(messageId)) {
         case (?message) {
           var existingVote : Text = "";
@@ -203,7 +196,6 @@ actor {
           return #err("Message does not exist");
         };
       };
-    };
   };
 
   //getAllmessages

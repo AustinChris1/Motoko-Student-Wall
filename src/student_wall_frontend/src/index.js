@@ -2,6 +2,7 @@ import { createActor, student_wall_backend } from "../../declarations/student_wa
 import { AuthClient } from "@dfinity/auth-client"
 import { HttpAgent } from "@dfinity/agent";
 import swal from 'sweetalert'
+// import Alpine from "alpine";
 
 let actor = student_wall_backend;
 
@@ -38,23 +39,21 @@ loginButton.onclick = async (e) => {
 
   // At this point we're authenticated, and we can get the identity from the auth client:
   const identity = authClient.getIdentity();
-  console.log("authClient: " + JSON.stringify(authClient, null, 2))
-  console.log("identity: " + JSON.stringify(identity, null, 2))
+
   // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
   const agent = new HttpAgent({ identity });
-  console.log("agent: " + JSON.stringify(agent, null, 2))
+
   // Using the interface description of our webapp, we create an actor that we use to call the service methods.
   actor = createActor(process.env.STUDENT_WALL_BACKEND_CANISTER_ID, {
     agent,
   });
-  console.log("actor: " + JSON.stringify(actor, null, 2));
 
   return false;
 };
 
 
 // main deal
-document.addEventListener('alpine:init', () => {
+document.addEventListener('alpine:init', async () => {
   Alpine.store('messages', {
     messages: [],
     add (message) {
@@ -98,6 +97,12 @@ document.addEventListener('alpine:init', () => {
     }
   })
 
+  Alpine.store("user", {
+    async init () {
+      console.log("udiuehdue")
+    }
+  })
+
   Alpine.store("messages").fetchAll()
 })
 
@@ -109,21 +114,63 @@ document.querySelector("#writeForm").addEventListener("submit", async function(e
   const btn = event.target.querySelector("#submit-btn");
 
   const inputText = document.getElementById("formText").value;
+  const inputImage = document.getElementById("formImage").files[0];
+  const inputVideo = document.getElementById("formVideo").files[0];
 
+  let imageBlob = null
+  let videoBlob = null
 
-  if (document.getElementById("formText").value.length != 0){
-      btn.setAttribute("disabled", true);
-      const response = await actor.writeMessage({Text:inputText});
-      swal("Message", "success", "success");
-      document.getElementById("formText").value = "";
-  }
-  // await dbank_backend.compound();
+  const imageFileReader = new FileReader()
+  imageFileReader.readAsArrayBuffer(inputImage)
+  imageFileReader.addEventListener("loadend", async () => {
+    const imageBuffer = [... new Uint8Array(imageFileReader.result)]
+    // imageBlob = new Blob([imageBuffer], { type: inputImage.type})
 
-  // show();
-  Alpine.store("messages").fetchAll()
-  btn.removeAttribute("disabled");
+    if (inputVideo) {
+      const videoFileReader = new FileReader()
+      videoFileReader.readAsArrayBuffer(inputVideo)
+      videoFileReader.addEventListener("loadend", async () => {
+        const videoBuffer = [...new Uint8Array(videoFileReader.result)]
+        // videoBlob = new Blob([videoBuffer], { type: inputVideo.type})
 
-});
+        if (document.getElementById("formText").value.length != 0){
+          btn.setAttribute("disabled", true);
+          
+          // await writeMessage(inputText, imageBlob, videoBlob)
+          await writeMessage(inputText, imageBuffer, videoBuffer)
+          // await writeMessage(inputText)
+
+          document.getElementById("formText").value = "";
+        }
+
+        Alpine.store("messages").fetchAll()
+        btn.removeAttribute("disabled");
+      })
+    }
+    // else {
+    //   if (document.getElementById("formText").value.length != 0){
+    //     btn.setAttribute("disabled", true);
+        
+    //     await writeMessage(inputText, imageBlob, videoBlob)
+
+    //     document.getElementById("formText").value = "";
+    //   }
+
+    //       Alpine.store("messages").fetchAll()
+//       btn.removeAttribute("disabled");
+//     }
+  });
+})
+
+async function writeMessage(inputText, imageBlob, videoBlob) {
+  
+  // const response = await actor.writeMessage({Text:inputText, Image:imageBlob, Video:videoBlob});
+  const response = await actor.writeMessage({Text:inputText});
+
+  const message = !!response.err ? response.err : "Created successfully";
+  const icon = !!response.err ? "error" : "success";
+  swal("Message", message, icon);
+}
 //update message
 document.querySelector("#updateForm").addEventListener("submit", async function(event){
   event.preventDefault();
@@ -138,7 +185,10 @@ document.querySelector("#updateForm").addEventListener("submit", async function(
       btn.setAttribute("disabled", true);
       // const response = await actor.updateMessage({messageId : id , Text: inputText});
       const response = await actor.updateMessage( id, {Text: inputText});
-      // swal("Message", response);
+      console.log(response);
+      const message = !!response.err ? response.err : "Updated successfully";
+      const icon = !!response.err ? "error" : "success";
+      swal("Message", message, icon);
       document.getElementById("updateText").value = "";
   }
   Alpine.store("messages").fetchAll()

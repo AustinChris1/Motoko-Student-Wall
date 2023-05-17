@@ -14,7 +14,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body x-data="{}">
+<body x-data="{ currentMessage: null }">
   <main>
     <div class="container-fluid px-4">
 
@@ -85,6 +85,14 @@
                   <textarea name="Text" id="formText" class="form-control" rows="4"></textarea>
                 </div>
                 <div class="col-md-12 mb-3">
+                  <label for="">Image</label>
+                  <input id="formImage" type="file" class="form-control"/>
+                </div>
+                <div class="col-md-12 mb-3">
+                  <label for="">Video</label>
+                  <input id="formVideo" type="file" class="form-control" />
+                </div>
+                <div class="col-md-12 mb-3">
                   <button type="submit" class="btn btn-primary" id="submit-btn" name="write">Write Message</button>
                 </div>
               </div>
@@ -105,19 +113,43 @@
                       <th>Delete Message</th>
                     </tr>
                   </thead>
-                  <tbody id="output" class="align-middle" x-data="{ messages: !!$store.messages ? $store.messages?.messages : []}">
+                  <tbody id="output" class="align-middle"
+                    x-data="{ messages: !!$store.messages ? $store.messages?.messages : []}">
                     <template x-for="message in messages">
-                    <tr>
-                      <td x-text="message.messageId"></td>
-                      <td x-text="message.content.Text"></td>
-                      <td x-text="message.creator"></td>
-                      <td x-text="message.vote"></td>
-                      <td><button @click="$store.events.upVote(message.messageId)" class="btn btn-success upvote-message.messageId"> &#43; </button></td>
-                      <td><button @click="$store.events.downVote(message.messageId)" class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
-                      <td x-text="message.voters"></td>
-                      <td><button @click="$store.events.deleteMessage(message.messageId)" class="btn btn-danger delete.messageId"> &times; </button></td>
-                      <td></td>
-                    </tr>
+                      <tr>
+                        <td x-text="message.messageId"></td>
+                        <td x-text="message.content.Text"></td>
+                        <td x-text="message.creator"></td>
+                        <td x-text="message.vote"></td>
+                        <td><button @click="$store.events.upVote(message.messageId)"
+                            class="btn btn-success upvote-message.messageId"> &#43; </button></td>
+                        <td><button @click="$store.events.downVote(message.messageId)"
+                            class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
+                        <td><button class="btn btn-secondary" data-toggle="modal" data-target="#votersModal"> View
+                          </button>
+                          <!-- Button trigger modal -->
+                          <!-- Modal -->
+                          <div class="modal fade" id="votersModal" tabindex="-1" role="dialog"
+                            aria-labelledby="votersModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="votersModalLabel">Update Message</h5>
+                                  <button type="button" class="close bg-danger" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <template x-for="voter in message.voters">
+                                <div x-text="voter" class="modal-body">
+                                </template>
+                              </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td><button @click="$store.events.deleteMessage(message.messageId)"
+                            class="btn btn-danger delete.messageId"> &times; </button></td>
+                      </tr>
                     </template>
                   </tbody>
                 </table>
