@@ -10,6 +10,7 @@
   <!-- Bootstrap CSS -->
   <link type="text/css" rel="stylesheet" href="main.css" />
   <link type="text/css" rel="stylesheet" href="bootstrap.css" />
+  <link type="text/css" rel="stylesheet" href="/fontawesome/css/all.min.css" />
   <!-- <script src="sweetalert.min.js"></script> -->
   <script defer src="alpine.js"></script>
 </head>
@@ -89,9 +90,9 @@
                         <td x-text="message.content.Text"></td>
                         <td x-text="message.creator"></td>
                         <td x-text="message.vote"></td>
-                        <td><button @click="$store.events.upVote(message.messageId)" class="btn btn-success upvote-message.messageId"> &#43; </button></td>
-                        <td><button @click="$store.events.downVote(message.messageId)" class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
-                        <td><button class="btn btn-secondary" data-toggle="modal" :data-target="'#votersModal' + message.messageId"> View
+                        <td><button @click="$store.events.upVote(message.messageId)" class="btn btn-success upvote-message.messageId"><i class="fa-solid fa-chevron-up"></i></button></td>
+                        <td><button @click="$store.events.downVote(message.messageId)" class="btn btn-danger downvote-message.messageId"><i class="fa-solid fa-chevron-down"></i></button></td>
+                        <td><button class="btn btn-secondary" data-toggle="modal" :data-target="'#votersModal' + message.messageId"><i class="fa-solid fa-eye"></i>
                           </button>
                           <!-- Button trigger modal -->
                           <!-- Modal -->
@@ -113,8 +114,7 @@
                           </div>
                         </td>
                         <td>
-                          <button class="btn btn-primary float-end" data-toggle="modal" :data-target="'#exampleModal' + message.messageId">Update
-                            Message</button>
+                          <button class="btn btn-primary float-end" data-toggle="modal" :data-target="'#exampleModal' + message.messageId"><i class="fa-sharp fa-solid fa-pen-to-square"></i></button>
                           <!-- Button trigger modal -->
                           <!-- Modal -->
                           <div class="modal fade" x-data="{ closeBtn: null }" :id="'exampleModal' + message.messageId" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -163,7 +163,7 @@
             
                         </td>
                         <td><button @click="$store.events.deleteMessage(message.messageId)"
-                            class="btn btn-danger delete.messageId"> &times; </button></td>
+                            class="btn btn-danger delete.messageId"> <i class="fa-solid fa-trash"></i> </button></td>
                       </tr>
                     </template>
                   </tbody>
