@@ -2,7 +2,6 @@ import { createActor, student_wall_backend } from "../../declarations/student_wa
 import { AuthClient } from "@dfinity/auth-client"
 import { HttpAgent } from "@dfinity/agent";
 import swal from 'sweetalert'
-// import Alpine from "alpine";
 
 let actor = student_wall_backend;
 
@@ -13,105 +12,169 @@ greetButton.onclick = async (e) => {
   greetButton.setAttribute("disabled", true);
 
   // Interact with backend actor, calling the greet method
-  const greeting = await actor.greet();
+  const principal = Alpine.store("user").principal
 
   greetButton.removeAttribute("disabled");
-  swal("Your Principal ID is", greeting);
+  swal("Your Principal ID is", principal);
   // document.getElementById("greeting").innerText = greeting;
 
   return false;
 };
 
-const loginButton = document.getElementById("login");
-loginButton.onclick = async (e) => {
-  e.preventDefault();
+// const loginButton = document.getElementById("login");
+// loginButton.onclick = async (e) => {
+//   e.preventDefault();
 
-  // create an auth client
-  let authClient = await AuthClient.create();
+//   // create an auth client
+//   let authClient = await AuthClient.create();
 
-  // start the login process and wait for it to finish
-  await new Promise((resolve) => {
-    authClient.login({
-      identityProvider: process.env.II_URL,
-      onSuccess: resolve,
-    });
-  });
-  // At this point we're authenticated, and we can get the identity from the auth client:
-  const identity = authClient.getIdentity();
+//   // start the login process and wait for it to finish
+//   await new Promise((resolve) => {
+//     authClient.login({
+//       identityProvider: process.env.II_URL,
+//       onSuccess: resolve,
+//     });
+//   });
+//   // At this point we're authenticated, and we can get the identity from the auth client:
+//   const identity = authClient.getIdentity();
 
-  // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
-  const agent = new HttpAgent({ identity });
+//   // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
+//   const agent = new HttpAgent({ identity });
 
-  // Using the interface description of our webapp, we create an actor that we use to call the service methods.
-  actor = createActor(process.env.STUDENT_WALL_BACKEND_CANISTER_ID, {
-    agent,
-  });
+//   // Using the interface description of our webapp, we create an actor that we use to call the service methods.
+//   actor = createActor(process.env.STUDENT_WALL_BACKEND_CANISTER_ID, {
+//     agent,
+//   });
 
-  return false;
-};
+//   return false;
+// };
 
+// const authClient = await AuthClient.create();
+// if(authClient.isAuthenticated){
+//   loginButton.innerText="Logout";
+//   loginButton.onclick = async (e) => {
+//     e.preventDefault();
+//     authClient.logout();
+//   }
+
+// }
 
 // main deal
-document.addEventListener('alpine:init', async () => {
-  const authClient = await AuthClient.create();
-
-  Alpine.store('messages', {
-    messages: [],
-    add(message) {
-      if (this.messages.find(_message => _message.messageId === message.messageId))
-        return
-      this.messages.push(message)
-    },
-    async fetchAll() {
-      for (let i = 0; i < this.messages.length; i++)
-        this.messages.pop()
-
-      const response = await actor.getAllMessagesRanked();
-      console.log(response)
-      for (const message of response)
-        this.add(message)
-    }
-  })
-
-  Alpine.store('events', {
-    async upVote(msgId) {
-      const response = await actor.upVote(msgId);
-      Alpine.store("messages").fetchAll()
-      const message = !!response.err ? response.err : "Upvoted successfully";
-      const icon = !!response.err ? "error" : "success";
-      swal("Message", message, icon);
-      console.log(response);
-    },
-    async downVote(msgId) {
-      const response = await actor.downVote(msgId);
-      Alpine.store("messages").fetchAll()
-      const message = !!response.err ? response.err : "Downvoted successfully";
-      const icon = !!response.err ? "error" : "success";
-      swal("Message", message, icon);
-      console.log(response);
-    },
-    async getVotes(msgId) {
-      const response = await actor.getVoters(msgId);
-      console.log(response);
-    },
-    async deleteMessage(msgId) {
-      const response = await actor.deleteMessage(msgId);
-      Alpine.store("messages").fetchAll()
-      const message = !!response.err ? response.err : "Deleted successfully";
-      const icon = !!response.err ? "error" : "success";
-      swal("Message", message, icon);
-      console.log(response);
-    }
-  })
-
-  Alpine.store("user", {
-    isLoggedIn: false
-  })
-
-  if (await authClient.isAuthenticated()) {
-    Alpine.store("user").isLoggedIn = true
+Alpine.store("user", {
+  isLoggedIn: false,
+  principal: "",
+  setIdentity(principal, isLoggedIn) {
+    this.principal = principal
+    this.isLoggedIn = isLoggedIn
+  },
+  removeIdentity(principal) {
+    this.principal = principal
+    this.isLoggedIn = false
   }
+})
 
+Alpine.store('events', {
+  async upVote(msgId) {
+    const response = await actor.upVote(msgId);
+    Alpine.store("messages").fetchAll()
+    const message = !!response.err ? response.err : "Upvoted successfully";
+    const icon = !!response.err ? "error" : "success";
+    swal("Message", message, icon);
+    console.log(response);
+  },
+  async downVote(msgId) {
+    const response = await actor.downVote(msgId);
+    Alpine.store("messages").fetchAll()
+    const message = !!response.err ? response.err : "Downvoted successfully";
+    const icon = !!response.err ? "error" : "success";
+    swal("Message", message, icon);
+    console.log(response);
+  },
+  async getVotes(msgId) {
+    const response = await actor.getVoters(msgId);
+    console.log(response);
+  },
+  async deleteMessage(msgId) {
+    const response = await actor.deleteMessage(msgId);
+    Alpine.store("messages").fetchAll()
+    const message = !!response.err ? response.err : "Deleted successfully";
+    const icon = !!response.err ? "error" : "success";
+    swal("Message", message, icon);
+    console.log(response);
+  },
+  async login() {
+    // e.preventDefault();
+  const authClient = await AuthClient.create({
+    keyType: "Ed25519"
+  });
+
+
+    await new Promise((resolve) => {
+      authClient.login({
+        identityProvider: process.env.II_URL,
+        onSuccess: resolve,
+      });
+    });
+    // At this point we're authenticated, and we can get the identity from the auth client:
+    const identity = authClient.getIdentity();
+
+    // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
+    const agent = new HttpAgent({ identity });
+
+    // Using the interface description of our webapp, we create an actor that we use to call the service methods.
+    actor = createActor(process.env.STUDENT_WALL_BACKEND_CANISTER_ID, {
+      agent,
+    });
+
+    Alpine.store("user").setIdentity(identity.getPrincipal().toString(), await authClient.isAuthenticated())
+  },
+  async logout() {
+    // e.preventDefault();
+    const authClient = await AuthClient.create({
+      keyType: "Ed25519"
+    });
+
+    console.log("logging out......")
+    await authClient.logout();
+    console.log(authClient.getIdentity())
+
+      const identity = authClient.getIdentity();
+
+   const agent = new HttpAgent({ identity });
+
+    actor = createActor(process.env.STUDENT_WALL_BACKEND_CANISTER_ID, {
+          agent,
+         });
+    // await authClient.logout({
+    //   actor: createActor(),
+    //   onSuccess: resolve,
+    // })
+    const principal = await actor.greet()
+    console.log(principal)
+    // window.actor=actor
+    Alpine.store("user").removeIdentity(principal)
+  }
+})
+
+Alpine.store('messages', {
+  messages: [],
+  add(message) {
+    if (this.messages.find(_message => _message.messageId === message.messageId))
+      return
+    this.messages.push(message)
+  },
+  async fetchAll() {
+    for (let i = 0; i < this.messages.length; i++)
+      this.messages.pop()
+
+    const response = await actor.getAllMessagesRanked();
+    console.log(response)
+    for (const message of response)
+      this.add(message)
+  }
+})
+
+document.addEventListener('alpine:init', () => {
   Alpine.store("messages").fetchAll()
 })
 
@@ -123,8 +186,8 @@ document.querySelector("#writeForm").addEventListener("submit", async function (
   const btn = event.target.querySelector("#submit-btn");
 
   const inputText = document.getElementById("formText").value;
-  const inputImage = document.getElementById("formImage").files[0];
-  const inputVideo = document.getElementById("formVideo").files[0];
+  // const inputImage = document.getElementById("formImage").files[0];
+  // const inputVideo = document.getElementById("formVideo").files[0];
 
   // let imageBlob = null
   // let videoBlob = null
@@ -145,9 +208,9 @@ document.querySelector("#writeForm").addEventListener("submit", async function (
   if (document.getElementById("formText").value.length != 0) {
     btn.setAttribute("disabled", true);
 
-    await writeMessage(inputText, imageBlob, videoBlob)
+    // await writeMessage(inputText, imageBlob, videoBlob)
     // await writeMessage(inputText, imageBuffer, videoBuffer)
-    // await writeMessage(inputText)
+    await writeMessage(inputText)
 
     document.getElementById("formText").value = "";
   }
@@ -156,22 +219,10 @@ document.querySelector("#writeForm").addEventListener("submit", async function (
   btn.removeAttribute("disabled");
 })
 // }
-// else {
-//   if (document.getElementById("formText").value.length != 0){
-//     btn.setAttribute("disabled", true);
 
-//     await writeMessage(inputText, imageBlob, videoBlob)
 
-//     document.getElementById("formText").value = "";
-//   }
-
-//       Alpine.store("messages").fetchAll()
-//       btn.removeAttribute("disabled");
-//     }
-//   });
-// })
-
-async function writeMessage(inputText, imageBlob, videoBlob) {
+//write message
+async function writeMessage(inputText) {
 
   // const response = await actor.writeMessage({Text:inputText, Image:imageBlob, Video:videoBlob});
   const response = await actor.writeMessage({ Text: inputText });
@@ -180,6 +231,7 @@ async function writeMessage(inputText, imageBlob, videoBlob) {
   const icon = !!response.err ? "error" : "success";
   swal("Message", message, icon);
 }
+
 //update message
 document.querySelector("#updateForm").addEventListener("submit", async function (event) {
   event.preventDefault();

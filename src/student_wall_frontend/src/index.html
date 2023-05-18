@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>student_wall</title>
+  <title>Motoko Student Wall</title>
   <base href="/" />
   <link rel="icon" href="favicon.ico" />
   <!-- Bootstrap CSS -->
@@ -16,27 +16,30 @@
 
 <body x-data="{ }">
   <main>
-    <div class="container-fluid px-4">
+    <div class="container-fluid">
 
-      <div class="row mt-4">
+      <div class="row">
         <div class="card">
-          <div class="card-header">
-
             <img src="logo2.svg" alt="DFINITY logo" />
             <br />
             <br />
-            <form>
-              <button x-show="!!$store.user ? $store.user.isLoggedIn : true" class="btn btn-lg btn-primary w-50 float-end" id="login"><img src="internet-computer-icp-logo.svg"
-                  alt="ICP logo" width="60" height="25" />Login</button>
+            <form action="#" @submit.prevent="">
+              <template x-if="!!$store.user && !$store.user.isLoggedIn">
+                <button @click="$store.events.login()" 
+                class="btn btn-lg btn-primary d-flex justify-content-center" id="login"><img src="internet-computer-icp-logo.svg" alt="ICP logo" width="50" height="25" />Login</button>
+              </template>
+              <template x-if="!!$store.user && $store.user.isLoggedIn">
+              <button @click="$store.events.logout()" 
+              class="btn btn-lg btn-primary d-flex justify-content-center" id="logout">
+              <img src="internet-computer-icp-logo.svg" alt="ICP logo" width="50" height="25" />Logout</button>
+              </template>
             </form>
             <br />
 
             <form>
               <button class="btn btn-lg btn-success" id="greet">View Principal ID</button>
             </form>
-            <section id="greeting"></section>
             <br>
-          </div>
           <div class="card-header">
             <h4>Write Message
               <button class="btn btn-primary float-end" data-toggle="modal" data-target="#exampleModal">Update
@@ -84,14 +87,14 @@
                   <label for="">Text</label>
                   <textarea name="Text" id="formText" class="form-control" rows="4"></textarea>
                 </div>
-                <div class="col-md-12 mb-3">
+                <!-- <div class="col-md-12 mb-3">
                   <label for="">Image</label>
-                  <input id="formImage" type="file" class="form-control"/>
+                  <input id="formImage" type="file" class="form-control" />
                 </div>
                 <div class="col-md-12 mb-3">
                   <label for="">Video</label>
                   <input id="formVideo" type="file" class="form-control" />
-                </div>
+                </div> -->
                 <div class="col-md-12 mb-3">
                   <button type="submit" class="btn btn-primary" id="submit-btn" name="write">Write Message</button>
                 </div>
@@ -113,18 +116,15 @@
                       <th>Delete Message</th>
                     </tr>
                   </thead>
-                  <tbody id="output" class="align-middle"
-                    x-data="{ messages: !!$store.messages ? $store.messages?.messages : []}">
+                  <tbody id="output" class="align-middle" x-data="{ messages: !!$store.messages ? $store.messages?.messages : []}">
                     <template x-for="message in messages">
                       <tr>
                         <td x-text="message.messageId"></td>
                         <td x-text="message.content.Text"></td>
                         <td x-text="message.creator"></td>
                         <td x-text="message.vote"></td>
-                        <td><button @click="$store.events.upVote(message.messageId)"
-                            class="btn btn-success upvote-message.messageId"> &#43; </button></td>
-                        <td><button @click="$store.events.downVote(message.messageId)"
-                            class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
+                        <td><button @click="$store.events.upVote(message.messageId)" class="btn btn-success upvote-message.messageId"> &#43; </button></td>
+                        <td><button @click="$store.events.downVote(message.messageId)" class="btn btn-danger downvote-message.messageId"> &#8722 </button></td>
                         <td><button class="btn btn-secondary" data-toggle="modal" :data-target="'#votersModal' + message.messageId"> View
                           </button>
                           <!-- Button trigger modal -->
@@ -134,15 +134,14 @@
                             <div class="modal-dialog" role="document">
                               <div class="modal-content">
                                 <div class="modal-header">
-                                  <h5 class="modal-title" id="votersModalLabel">Update Message</h5>
+                                  <h5 class="modal-title" id="votersModalLabel">Voters</h5>
                                   <button type="button" class="close bg-danger" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                   </button>
                                 </div>
                                 <template x-for="voter in message.voters">
-                                <div x-text="voter" class="modal-body">
+                                  <div x-text="voter" class="modal-body">
                                 </template>
-                              </div>
                               </div>
                             </div>
                           </div>
@@ -154,13 +153,10 @@
                   </tbody>
                 </table>
               </div>
+            </section>
           </div>
         </div>
-        </section>
-        <section id="test"></section>
       </div>
-    </div>
-    </div>
     </div>
   </main>
   <!-- <script src="./main.js"></script> -->

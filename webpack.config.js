@@ -59,6 +59,7 @@ module.exports = {
   resolve: {
     extensions: [".js", ".ts", ".jsx", ".tsx"],
     fallback: {
+      crypto: require.resolve("crypto-browserify"),
       assert: require.resolve("assert/"),
       buffer: require.resolve("buffer/"),
       events: require.resolve("events/"),
