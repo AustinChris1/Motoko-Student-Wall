@@ -87,8 +87,8 @@ actor {
 
   // Update the content for a specific message by ID
   public shared ({ caller }) func updateMessage(messageId : Nat, c : Content) : async Result.Result<(), Text> {
-    if (messageId > wall.size()) {
-      return #err("Invalid Message Id " # Nat.toText(messageId));
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please login!");
     } else {
       switch (wall.get(messageId)) {
         case (?message) {
@@ -115,84 +115,95 @@ actor {
 
   //Delete a specific message by ID
   public shared ({ caller }) func deleteMessage(messageId : Nat) : async Result.Result<(), Text> {
-    switch (wall.get(messageId)) {
-      case (?message) {
-        if (Principal.equal(message.creator, caller)) {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please login!");
+    } else {
+      switch (wall.get(messageId)) {
+        case (?message) {
+          if (Principal.equal(message.creator, caller)) {
 
-          wall.delete(messageId);
-          return #ok();
-        } else {
-          #err("Only message creator can delete message");
+            wall.delete(messageId);
+            return #ok();
+          } else {
+            #err("Only message creator can delete message");
+          };
+
         };
-
-      };
-      case (_) {
-        return #err("No message");
+        case (_) {
+          return #err("No message");
+        };
       };
     };
-
   };
 
   // Voting
   public shared ({ caller }) func upVote(messageId : Nat) : async Result.Result<(), Text> {
-    switch (wall.get(messageId)) {
-      case (?message) {
-        var existingVote : Text = "";
-        for (element in message.voters.vals()) {
-          if (element == caller) {
-            existingVote := Principal.toText(element);
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please login!");
+    } else {
+      switch (wall.get(messageId)) {
+        case (?message) {
+          var existingVote : Text = "";
+          for (element in message.voters.vals()) {
+            if (element == caller) {
+              existingVote := Principal.toText(element);
+            };
           };
-        };
-        if (existingVote == "") {
-          let updatedVoters = Array.append(message.voters, [caller]);
-          let updatedMessage : Message = {
-            messageId = message.messageId;
-            vote = message.vote + 1;
-            content = message.content;
-            creator = message.creator;
-            voters = updatedVoters;
+          if (existingVote == "") {
+            let updatedVoters = Array.append(message.voters, [caller]);
+            let updatedMessage : Message = {
+              messageId = message.messageId;
+              vote = message.vote + 1;
+              content = message.content;
+              creator = message.creator;
+              voters = updatedVoters;
+            };
+            wall.put(messageId, updatedMessage);
+            return #ok();
+          } else {
+            return #err("You have already voted!");
           };
-          wall.put(messageId, updatedMessage);
-          return #ok();
-        } else {
-          return #err("You have already voted!");
-        };
 
-      };
-      case (null) {
-        return #err("Message does not exist");
+        };
+        case (null) {
+          return #err("Message does not exist");
+        };
       };
     };
   };
 
   //downVote
   public shared ({ caller }) func downVote(messageId : Nat) : async Result.Result<(), Text> {
-    switch (wall.get(messageId)) {
-      case (?message) {
-        var existingVote : Text = "";
-        for (element in message.voters.vals()) {
-          if (element == caller) {
-            existingVote := Principal.toText(element);
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please login!");
+    } else {
+      switch (wall.get(messageId)) {
+        case (?message) {
+          var existingVote : Text = "";
+          for (element in message.voters.vals()) {
+            if (element == caller) {
+              existingVote := Principal.toText(element);
+            };
           };
-        };
-        if (existingVote == "") {
-          let updatedVoters = Array.append(message.voters, [caller]);
-          let updatedMessage : Message = {
-            messageId = message.messageId;
-            vote = message.vote - 1;
-            content = message.content;
-            creator = message.creator;
-            voters = updatedVoters;
+          if (existingVote == "") {
+            let updatedVoters = Array.append(message.voters, [caller]);
+            let updatedMessage : Message = {
+              messageId = message.messageId;
+              vote = message.vote - 1;
+              content = message.content;
+              creator = message.creator;
+              voters = updatedVoters;
+            };
+            wall.put(messageId, updatedMessage);
+            return #ok();
+          } else {
+            return #err("You have already voted!");
           };
-          wall.put(messageId, updatedMessage);
-          return #ok();
-        } else {
-          return #err("You have already voted!");
-        };
 
-      };
-      case (null) {
-        return #err("Message does not exist");
+        };
+        case (null) {
+          return #err("Message does not exist");
+        };
       };
     };
   };

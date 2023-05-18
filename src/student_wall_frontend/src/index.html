@@ -42,41 +42,6 @@
             <br>
           <div class="card-header">
             <h4>Write Message
-              <button class="btn btn-primary float-end" data-toggle="modal" data-target="#exampleModal">Update
-                Message</button>
-              <!-- Button trigger modal -->
-              <!-- Modal -->
-              <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">Update Message</h5>
-                      <button type="button" class="close bg-danger" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                    <div class="modal-body">
-                      <form action="#" id="updateForm" method="POST">
-                        <div class="row">
-                          <div class="col-md-12 mb-3">
-                            <label for="">Message ID</label>
-                            <input type="number" name="updateText" id="updateVal" class="form-control">
-                          </div>
-                          <div class="col-md-12 mb-3">
-                            <label for="">Text</label>
-                            <textarea name="Text" id="updateText" class="form-control" rows="4"></textarea>
-                          </div>
-                          <div class="col-md-12 mb-3">
-                            <button type="submit" class="btn btn-primary" id="update-btn" name="write">Update
-                              Message</button>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </h4>
           </div>
 
@@ -110,10 +75,11 @@
                       <th>All Messages</th>
                       <th>Uploaded By</th>
                       <th>Votes</th>
-                      <th>UpVote Message</th>
-                      <th>DownVote Message</th>
+                      <th>UpVote</th>
+                      <th>DownVote</th>
                       <th>All Voters</th>
-                      <th>Delete Message</th>
+                      <th>Update</th>
+                      <th>Delete</th>
                     </tr>
                   </thead>
                   <tbody id="output" class="align-middle" x-data="{ messages: !!$store.messages ? $store.messages?.messages : []}">
@@ -145,6 +111,56 @@
                               </div>
                             </div>
                           </div>
+                        </td>
+                        <td>
+                          <button class="btn btn-primary float-end" data-toggle="modal" :data-target="'#exampleModal' + message.messageId">Update
+                            Message</button>
+                          <!-- Button trigger modal -->
+                          <!-- Modal -->
+                          <div class="modal fade" x-data="{ closeBtn: null }" :id="'exampleModal' + message.messageId" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="exampleModalLabel">Update Message</h5>
+                                  <button type="button" class="close bg-danger" data-dismiss="modal" x-init="closeBtn = $el" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <form action="#" x-data="{ messageText: message.content.Text }" id="updateForm" @submit.prevent='async () => {
+                                    if (messageText.length === 0)
+                                      return
+                                      
+                                    const btn = $event.target.querySelector("button")
+                                    btn.setAttribute("disabled", true);
+                                    await $store.events.updateMessage(message.messageId, messageText)
+
+                                    messageText = ""
+                                    closeBtn.click()
+                                    btn.removeAttribute("disabled");
+
+                                    $store.messages.fetchAll()
+                                  }' method="POST">
+                                    <div class="row">
+                                        <input type="number" name="updateText" id="updateVal" class="form-control" :value="message.messageId" hidden>
+                                      <div class="col-md-12 mb-3">
+                                        <label for="">Text</label>
+                                        <textarea name="Text" id="updateText" class="form-control" rows="4"
+                                        x-model="messageText"></textarea>
+                                      </div>
+                                      <div class="col-md-12 mb-3">
+                                        <button type="submit" class="btn btn-primary" id="update-btn" name="write">
+                                          Update
+                                          Message</button>
+                                      </div>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+            
                         </td>
                         <td><button @click="$store.events.deleteMessage(message.messageId)"
                             class="btn btn-danger delete.messageId"> &times; </button></td>

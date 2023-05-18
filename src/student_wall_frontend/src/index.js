@@ -87,19 +87,23 @@ Alpine.store('events', {
     Alpine.store("messages").fetchAll()
     const message = !!response.err ? response.err : "Downvoted successfully";
     const icon = !!response.err ? "error" : "success";
-    swal("Message", message, icon);
+    await swal("Message", message, icon);
     console.log(response);
   },
-  async getVotes(msgId) {
-    const response = await actor.getVoters(msgId);
+  async updateMessage(messageId, text) {
+    const response = await actor.updateMessage(messageId, { Text: text });
+
     console.log(response);
+    const message = !!response.err ? response.err : "Updated successfully";
+    const icon = !!response.err ? "error" : "success";
+    await swal("Message", message, icon);
   },
   async deleteMessage(msgId) {
     const response = await actor.deleteMessage(msgId);
     Alpine.store("messages").fetchAll()
     const message = !!response.err ? response.err : "Deleted successfully";
     const icon = !!response.err ? "error" : "success";
-    swal("Message", message, icon);
+    await swal("Message", message, icon);
     console.log(response);
   },
   async login() {
@@ -129,29 +133,21 @@ Alpine.store('events', {
     Alpine.store("user").setIdentity(identity.getPrincipal().toString(), await authClient.isAuthenticated())
   },
   async logout() {
-    // e.preventDefault();
     const authClient = await AuthClient.create({
       keyType: "Ed25519"
     });
 
-    console.log("logging out......")
     await authClient.logout();
-    console.log(authClient.getIdentity())
 
-      const identity = authClient.getIdentity();
+    const identity = authClient.getIdentity();
 
    const agent = new HttpAgent({ identity });
 
     actor = createActor(process.env.STUDENT_WALL_BACKEND_CANISTER_ID, {
-          agent,
-         });
-    // await authClient.logout({
-    //   actor: createActor(),
-    //   onSuccess: resolve,
-    // })
+      agent,
+    });
+    
     const principal = await actor.greet()
-    console.log(principal)
-    // window.actor=actor
     Alpine.store("user").removeIdentity(principal)
   }
 })
@@ -164,8 +160,7 @@ Alpine.store('messages', {
     this.messages.push(message)
   },
   async fetchAll() {
-    for (let i = 0; i < this.messages.length; i++)
-      this.messages.pop()
+    this.messages.splice(0, this.messages.length)
 
     const response = await actor.getAllMessagesRanked();
     console.log(response)
@@ -174,8 +169,17 @@ Alpine.store('messages', {
   }
 })
 
-document.addEventListener('alpine:init', () => {
+document.addEventListener('alpine:init', async () => {
+  const authClient = await AuthClient.create({
+    keyType: "Ed25519"
+  });
+
+  await authClient.logout();
+
+  const identity = authClient.getIdentity();
+
   Alpine.store("messages").fetchAll()
+  Alpine.store("user").setIdentity(identity.getPrincipal().toString(), await authClient.isAuthenticated())
 })
 
 
@@ -233,7 +237,7 @@ async function writeMessage(inputText) {
 }
 
 //update message
-document.querySelector("#updateForm").addEventListener("submit", async function (event) {
+document.querySelector("#updateForm")?.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const btn = event.target.querySelector("#update-btn");
